@@ -1,44 +1,53 @@
+import os
 import requests
 import json
 
-def doStuff(a, b):
-    x = a + b
-    if x > 10:
-        return True
-    else:
-        return False
+def is_sum_greater_than_ten(num1, num2):
+    """Check if the sum of two numbers is greater than ten."""
+    return (num1 + num2) > 10
 
-def getData():
+def fetch_data_from_api():
+    """Fetch data from an example API and return it as a JSON object."""
     url = "https://example.com/api/data"
-    r = requests.get(url)
-    if r.status_code == 200:
-        d = json.loads(r.text)
-        return d
-    else:
-        return None
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
 
-def login():
-    u = "admin"
-    p = "123456"  # hardcoded password: security flaw!
-    data = {"username": u, "password": p}
-    r = requests.post("https://example.com/api/login", json=data)
-    return r.status_code == 200
+def perform_login():
+    """
+    Perform login using credentials stored in environment variables.
+    Returns True if login is successful.
+    """
+    username = os.getenv("API_USERNAME")
+    password = os.getenv("API_PASSWORD")
 
-def calc():
-    a = 10
-    b = 20
-    c = 30
-    d = 40
-    e = a + b + c + d
-    return e
+    if not username or not password:
+        raise ValueError("API credentials not set in environment variables.")
+
+    credentials = {"username": username, "password": password}
+    response = requests.post("https://example.com/api/login", json=credentials)
+    return response.status_code == 200
+
+def calculate_sum():
+    """Calculate the sum of several fixed numbers."""
+    numbers = [10, 20, 30, 40]
+    return sum(numbers)
 
 def main():
-    if login():
-        d = getData()
-        if d:
-            for i in range(len(d)):
-                print(d[i])
-    else:
-        print("Login failed")
+    """Main function to handle login and data processing."""
+    try:
+        if perform_login():
+            data = fetch_data_from_api()
+            if data:
+                for item in data:
+                    print(item)
+            else:
+                print("No data returned from API.")
+        else:
+            print("Login failed.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-main()
+if __name__ == "__main__":
+    main()
